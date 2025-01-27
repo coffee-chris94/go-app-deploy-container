@@ -1,0 +1,9 @@
+# MQL policy file to check Dockerfile for binary placement and port exposure
+
+# Check if the binary is placed in a valid directory (avoid /tmp or /root)
+docker.file.stages.all(run.any(script.contains("mv main /root/")))
+docker.file.stages.all(run.none(script.contains("mv main /tmp/")))
+
+# Check if port 8080 is exposed in the Dockerfile
+docker.file.stages.all(expose.any(port == 8080))
+

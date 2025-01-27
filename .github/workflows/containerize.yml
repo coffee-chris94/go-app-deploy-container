@@ -1,0 +1,33 @@
+name: Containerize
+
+on:
+  repository_dispatch:
+    types: [build_container]
+
+jobs:
+  containerize:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Install cnspec (cnquery)
+      run: |
+        bash -c "$(curl -sSL https://install.mondoo.com/sh)"
+
+    - name: Verify Dockerfile with cnquery (No policy)
+      run: |
+        cnquery scan docker file Dockerfile
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t cafeespresso/go-web-app:latest .
+        docker push cafeespresso/go-web-app:latest
+
